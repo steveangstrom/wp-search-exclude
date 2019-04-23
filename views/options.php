@@ -22,7 +22,7 @@
                     <?php endwhile; ?>
                 </tbody>
             </table>
-
+            <p><input type="checkbox" value="1" name="hide_from_robots" name="checkbox" <?php checked($this->getNorobots(), 1); ?> ><label>Also discourage search engines for these items</label></p>
             <p class="submit"><input type="submit" name="search_exclude_submit" class="button-primary" value="<?php _e('Save Changes') ?>" /></p>
         </form>
     <?php endif; ?>

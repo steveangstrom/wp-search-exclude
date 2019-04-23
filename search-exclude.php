@@ -43,6 +43,7 @@ class SearchExclude
         add_action('edit_attachment', array($this, 'postSave'));
         add_action('add_meta_boxes', array($this, 'addMetabox') );
         add_filter('pre_get_posts', array($this, 'searchFilter'));
+        add_action('wp_head', array($this, 'noRobots')); // test hide from google.
 
         add_filter('bbp_has_replies_query', array($this, 'flagBbPress'));
 
@@ -104,6 +105,21 @@ class SearchExclude
             $excluded = array_diff($excluded, $postIds);
         }
         $this->saveExcluded($excluded);
+    }
+
+    /**
+     * @param $noRobots bool of whether search engines should  index all itmes
+     */
+    protected function saveNorobots($noRobots)  {
+        update_option('noRobots', $noRobots);
+        $this->noRobots = $noRobots;
+    }
+
+    protected function getNorobots(){
+        if (null === $this->noRobots) {
+            $this->noRobots = get_option('noRobots');
+        }
+        return $this->noRobots;
     }
 
     /**
@@ -243,6 +259,14 @@ class SearchExclude
         return $query;
     }
 
+    public function noRobots($postId){
+      if ( $this->getNorobots() && $this->isExcluded(get_the_ID())){
+      ?>
+        <meta name="robots" content="noindex,nofollow"/>
+      <?php
+      }
+    }
+
     public function isBbPress($query)
     {
         return $query->get('___s2_is_bbp_has_replies');
@@ -299,7 +323,10 @@ class SearchExclude
         if (isset($_POST['search_exclude_submit'])) {
 
             $excluded = $_POST['sep_exclude'];
+            $noRobots = $_POST['hide_from_robots'];
+
             $this->saveExcluded($excluded);
+            $this->saveNorobots($noRobots);
         }
     }
 }
